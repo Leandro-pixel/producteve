@@ -1,14 +1,16 @@
 services:
-  mysql:
-    image: mysql
-    ports:
-      - "3306:3306"
-    expose:
-      - "3306"
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    restart: always
     environment:
-      - MYSQL_USER=springuser
-      - MYSQL_PASSWORD=ThePassword
-      - MYSQL_DATABASE=db_example
-      - MYSQL_ROOT_PASSWORD=root
+      POSTGRES_DB: db_example
+      POSTGRES_USER: springuser
+      POSTGRES_PASSWORD: ThePassword
+    ports:
+      - "5432:5432"
     volumes:
-      - "./conf.d:/etc/mysql/conf.d:ro"
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

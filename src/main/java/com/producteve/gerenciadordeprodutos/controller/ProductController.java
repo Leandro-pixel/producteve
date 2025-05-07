@@ -5,6 +5,7 @@ package com.producteve.gerenciadordeprodutos.controller;
 import com.producteve.gerenciadordeprodutos.entity.Product;
 import com.producteve.gerenciadordeprodutos.service.ProductService;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,8 @@ public class ProductController {
         return ResponseEntity.ok(created);
     }
 
+
+
     @PutMapping("/{id}")
     public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody ProductDto dto) {
         return service.update(id, dto)
@@ -43,5 +46,23 @@ public class ProductController {
     public ResponseEntity<ProductListResponseDTO> listByUserId(@RequestParam UUID userId) {
         return ResponseEntity.ok(service.listByUserId(userId));
     }
+
+    @GetMapping("/global")
+    public ResponseEntity<List<Product>> listGlobalProducts() {
+    return ResponseEntity.ok(service.listGlobalProducts());
+}
+
+@PostMapping("/copy-to-personal/{id}")
+public ResponseEntity<Product> copyGlobalToPersonal(@PathVariable Long id, @RequestParam UUID userId) {
+    return ResponseEntity.ok(service.copyGlobalProductToUser(id, userId));
+}
+
+@PostMapping("/comments/{id}")
+public ResponseEntity<Product> addComment(
+        @PathVariable Long id,
+        @RequestBody CommentDto dto) {
+    return ResponseEntity.ok(service.addComment(id, dto));
+}
+
     
 }

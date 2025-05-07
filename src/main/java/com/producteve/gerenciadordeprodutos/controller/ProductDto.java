@@ -59,4 +59,5 @@ public class ProductDto {
     public void setCalendarEventId(String calendarEventId) {
         this.calendarEventId = calendarEventId;
     }
+    
 }

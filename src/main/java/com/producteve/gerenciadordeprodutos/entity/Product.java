@@ -3,8 +3,13 @@ package com.producteve.gerenciadordeprodutos.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -36,6 +41,27 @@ public class Product {
 
     @CreationTimestamp
     private LocalDateTime creationTimestamp;
+
+    // Se é um produto do estoque global ou pessoal
+    @Column(nullable = false)
+    private boolean globalStock = false;
+
+    // Nome ou ID de quem criou o produto global (pode ser null para pessoais)
+    private String addedBy;
+
+    // Status de ativo/inativo (para o botão "Start/Stop")
+    @Column(nullable = false)
+    private boolean activeStatus = false;
+
+    // Contador de usuários que usam esse produto global
+    private int users = 0;
+
+    // Comentários associados (relação 1-N)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Comment> comments = new ArrayList<>();
+
 
     // Construtores
     public Product() {}
@@ -118,4 +144,44 @@ public class Product {
     public void setReminderDate(LocalDate reminderDate) {
         this.reminderDate = reminderDate;
     }
+    public boolean isGlobalStock() {
+        return globalStock;
+    }
+    
+    public void setGlobalStock(boolean globalStock) {
+        this.globalStock = globalStock;
+    }
+    
+    public String getAddedBy() {
+        return addedBy;
+    }
+    
+    public void setAddedBy(String addedBy) {
+        this.addedBy = addedBy;
+    }
+    
+    public boolean isActiveStatus() {
+        return activeStatus;
+    }
+    
+    public void setActiveStatus(boolean activeStatus) {
+        this.activeStatus = activeStatus;
+    }
+    
+    public int getUsers() {
+        return users;
+    }
+    
+    public void setUsers(int users) {
+        this.users = users;
+    }
+    
+    public List<Comment> getComments() {
+        return comments;
+    }
+    
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+    
 }

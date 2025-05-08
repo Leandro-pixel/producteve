@@ -70,6 +70,13 @@ public ResponseEntity<?> createUser(@RequestBody CreateUserDto createUserDto) {
             return ResponseEntity.status(401).body(new LoginResponse("Credenciais inválidas"));
         }
     }
+
+    @GetMapping("/search/userName")
+public ResponseEntity<List<User>> searchUsersByUsername(@RequestParam String username) {
+    List<User> users = userService.searchUsersByUsername(username);
+    return ResponseEntity.ok(users);
+}
+
     
  /* 
     @PostMapping("/login")

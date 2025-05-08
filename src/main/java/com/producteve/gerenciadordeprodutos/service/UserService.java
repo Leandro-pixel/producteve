@@ -38,7 +38,9 @@ public class UserService {
         return userRepository.save(entity);
     }
     
-    
+    public List<User> searchUsersByUsername(String username) {
+        return userRepository.findByUsernameContainingIgnoreCase(username);
+    }
         
     public Optional<User> getUserById(String userId) {
         return userRepository.findById(UUID.fromString(userId));

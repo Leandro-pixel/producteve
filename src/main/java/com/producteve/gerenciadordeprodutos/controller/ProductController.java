@@ -3,8 +3,6 @@ package com.producteve.gerenciadordeprodutos.controller;
 //import com.producteve.gerenciadordeprodutos.controller.ProductDto;
 //import com.producteve.gerenciadordeprodutos.controller.ProductListResponseDTO;
 import com.producteve.gerenciadordeprodutos.entity.Product;
-import com.producteve.gerenciadordeprodutos.repository.CommentRepository;
-import com.producteve.gerenciadordeprodutos.repository.ProductRepository;
 import com.producteve.gerenciadordeprodutos.service.ProductService;
 
 import java.util.List;
@@ -18,13 +16,9 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService service;
-    private final ProductRepository productRepository;
-    private final CommentRepository commentRepository;
 
-    public ProductController(ProductService service, ProductRepository productRepository, CommentRepository commentRepository) {
+    public ProductController(ProductService service) {
         this.service = service;
-        this.productRepository = productRepository;
-        this.commentRepository = commentRepository;
     }
 
     @PostMapping
@@ -68,14 +62,6 @@ public ResponseEntity<Product> addComment(
         @PathVariable Long id,
         @RequestBody CommentDto dto) {
     return ResponseEntity.ok(service.addComment(id, dto));
-}
-
-@DeleteMapping("/resetar")
-public ResponseEntity<String> resetarBanco() {
-    commentRepository.deleteAll();
-    productRepository.deleteAll();
-    // E outros repositórios, se houver
-    return ResponseEntity.ok("Banco resetado com sucesso");
 }
 
 }

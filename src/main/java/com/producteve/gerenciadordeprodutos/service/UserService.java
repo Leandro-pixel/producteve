@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.producteve.gerenciadordeprodutos.controller.CreateUserDto;
+import com.producteve.gerenciadordeprodutos.controller.UpdateUserDto;
 import com.producteve.gerenciadordeprodutos.entity.User;
 import com.producteve.gerenciadordeprodutos.repository.UserRepository;
 
@@ -45,6 +46,25 @@ public class UserService {
     public Optional<User> getUserById(String userId) {
         return userRepository.findById(UUID.fromString(userId));
         
+    }
+
+    public void updateUserById(String userId,UpdateUserDto updateUserDto) {
+
+        var id = UUID.fromString(userId);
+
+        var userEntity = userRepository.findById(id);
+
+        if (userEntity.isPresent()) {
+            var user = userEntity.get();
+
+            if (updateUserDto.username() != null) {
+                user.setUsername(updateUserDto.username());
+            }
+
+
+            userRepository.save(user);
+        }
+
     }
 
     public List<User> listUsers() {

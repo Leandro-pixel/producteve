@@ -6,8 +6,10 @@ import com.producteve.gerenciadordeprodutos.repository.FollowRepository;
 import com.producteve.gerenciadordeprodutos.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class FollowService {
@@ -34,6 +36,12 @@ public class FollowService {
         Follow follow = new Follow(follower, followed);
         followRepository.save(follow);
         return true;
+    }
+    public List<User> getFollowers(UUID userId) {
+        List<Follow> follows = followRepository.findByFollowedUserId(userId);
+        return follows.stream()
+            .map(Follow::getFollower)
+            .collect(Collectors.toList());
     }
 }
 

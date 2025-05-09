@@ -69,6 +69,11 @@ public class ProductService {
                 return productRepository.save(existing);
             });
         }
+
+        public Optional<Product> getById(Long id) {
+        return productRepository.findById(id);
+}
+
     
         public void delete(Long id) {
             productRepository.deleteById(id);
@@ -132,20 +137,33 @@ public Product addComment(Long productId, CommentDto dto) {
     Product product = productRepository.findById(productId)
         .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-    String userName = userRepository.findById(dto.getUserId())
-        .map(User::getUsername)
-        .orElse("Desconhecido");
-
     Comment comment = new Comment();
     comment.setUserId(dto.getUserId());
-    comment.setUserName(userName);
     comment.setText(dto.getText());
-    comment.setProduct(product);
 
-    product.getComments().add(comment);
+    // Buscando o nome do usuário
+    User user = userRepository.findById(dto.getUserId()).orElse(null);
 
-    return productRepository.save(product);
+    // Atribuindo o nome do usuário ao comentário
+    String userName = (user != null) ? user.getUsername() : "Desconhecido"; // Se o usuário não for encontrado, o nome será 'Desconhecido'
+
+    comment.setUserName(userName);
+    comment.setProduct(product); // Relacionando o comentário ao produto
+
+    product.getComments().add(comment); // Adicionando o comentário à lista de comentários do produto
+System.out.println("UUID recebido: " + dto.getUserId());
+Optional<User> userOpt = userRepository.findById(dto.getUserId());
+
+if (userOpt.isPresent()) {
+    System.out.println("Usuário encontrado: " + userOpt.get().getUsername());
+} else {
+    System.out.println("Usuário NÃO encontrado no banco.");
 }
+
+    return productRepository.save(product); // Salvando o produto com o novo comentário
+}
+
+
 
 
 }

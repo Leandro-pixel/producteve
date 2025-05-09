@@ -54,6 +54,13 @@ public ResponseEntity<?> createUser(@RequestBody CreateUserDto createUserDto) {
         }
     }
 
+     @PutMapping("/{userId}")
+    public ResponseEntity<Void> updateUserById(@PathVariable("userId") String userId,
+                                               @RequestBody UpdateUserDto updateUserDto) {
+        userService.updateUserById(userId, updateUserDto);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<User>> listUsers() {
         var users = userService.listUsers();
@@ -76,6 +83,7 @@ public ResponseEntity<List<User>> searchUsersByUsername(@RequestParam String use
     List<User> users = userService.searchUsersByUsername(username);
     return ResponseEntity.ok(users);
 }
+
 
     
  /* 

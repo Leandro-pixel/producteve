@@ -17,7 +17,7 @@ public class Comment {
 
     private UUID userId;
 
-    private String userName; // <-- Adicionando o campo
+    private String username; // <-- Adicionando o campo
 
     private String content;
 
@@ -46,11 +46,11 @@ public class Comment {
     }
 
     public String getUserName() {
-        return userName;
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserName(String username) {
+        this.username = username;
     }
 
     public String getText() {

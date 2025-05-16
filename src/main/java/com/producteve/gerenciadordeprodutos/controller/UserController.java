@@ -116,10 +116,11 @@ public ResponseEntity<List<User>> searchUsersByUsername(@RequestParam String use
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{userId}")
+    
+        */
+        @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteById(@PathVariable("userId") String userId) {
         userService.deleteById(userId);
         return ResponseEntity.noContent().build();
     }
-        */
 }

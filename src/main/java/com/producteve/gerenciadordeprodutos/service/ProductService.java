@@ -23,11 +23,14 @@ import com.producteve.gerenciadordeprodutos.repository.UserRepository;
 public class ProductService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final NotificationService notificationService;
+    private final FollowService followService;
 
-    public ProductService(ProductRepository productRepository,UserRepository userRepository) {
+    public ProductService(ProductRepository productRepository,UserRepository userRepository, NotificationService notificationService, FollowService followService) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
-
+        this.notificationService = notificationService;
+        this.followService = followService;
     }
 
     public void saveProduct(Product product) {
@@ -40,6 +43,9 @@ public class ProductService {
             .map(User::getUsername)
             .orElse("Desconhecido"); // Ou pode lançar uma exceção se preferir
 
+              Optional<User> userOpt = userRepository.findById(dto.getUserId());
+        if (userOpt.isEmpty()) throw new RuntimeException("Usuário não encontrado");
+            User owner = userOpt.get();
         Product product = new Product(
                 dto.getUserId(),
                 dto.getName(),
@@ -54,6 +60,22 @@ public class ProductService {
         product.setUsers(1);
 
         calculateReminder(product);
+
+         // 2. Busca seguidores
+        List<User> followers = followService.getFollowers(owner.getUserId());
+
+        // 3. Extrai os OneSignal IDs
+        List<String> oneSignalIds = followers.stream()
+                .map(User::getOnesignalId)
+                .filter(id -> id != null && !id.isBlank())
+                .toList();
+
+        // 4. Envia a notificação
+        notificationService.sendNotification(
+                oneSignalIds,
+                "Novo produto de " + owner.getUsername(),
+                owner.getUsername() + " acabou de adicionar um novo produto: " + product.getName()
+        );
 
         return productRepository.save(product);
     }
@@ -110,7 +132,6 @@ private void calculateReminder(Product product) {
 public List<Product> listGlobalProducts() {
     return productRepository.findByGlobalStockTrue();
 }
-
 public Product copyGlobalProductToUser(Long globalProductId, UUID userId) {
     Product globalProduct = productRepository.findById(globalProductId)
         .orElseThrow(() -> new RuntimeException("Produto global não encontrado"));
@@ -125,12 +146,29 @@ public Product copyGlobalProductToUser(Long globalProductId, UUID userId) {
     personalProduct.setValue(globalProduct.getValue());
     personalProduct.setEstimateWasteDays(globalProduct.getEstimateWasteDays());
     personalProduct.setLastPurchaseDate(globalProduct.getLastPurchaseDate());
-    personalProduct.setCalendarEventId(null); // novo evento para o usuário
+    personalProduct.setCalendarEventId(null);
     personalProduct.setReminderDate(globalProduct.getReminderDate());
     personalProduct.setGlobalStock(false);
     personalProduct.setActiveStatus(true);
 
-    return productRepository.save(personalProduct);
+    Product savedProduct = productRepository.save(personalProduct);
+
+    // Enviar notificação para o dono do produto original
+    Optional<User> followedUserOpt = userRepository.findById(globalProduct.getUserId());
+    Optional<User> followerUserOpt = userRepository.findById(userId);
+
+    if (followedUserOpt.isPresent() && followerUserOpt.isPresent()) {
+        String message = followerUserOpt.get().getUsername() + " adicionou um novo produto: " + globalProduct.getName();
+        String title = "Produto copiado!";
+
+        String playerId = followedUserOpt.get().getOnesignalId(); // <-- você precisa garantir que isso exista
+
+        if (playerId != null) {
+            notificationService.sendNotification(List.of(playerId), title, message);
+        }
+    }
+
+    return savedProduct;
 }
 
 public Product addComment(Long productId, CommentDto dto) {
@@ -141,26 +179,29 @@ public Product addComment(Long productId, CommentDto dto) {
     comment.setUserId(dto.getUserId());
     comment.setText(dto.getText());
 
-    // Buscando o nome do usuário
     User user = userRepository.findById(dto.getUserId()).orElse(null);
-
-    // Atribuindo o nome do usuário ao comentário
-    String userName = (user != null) ? user.getUsername() : "Desconhecido"; // Se o usuário não for encontrado, o nome será 'Desconhecido'
-
+    String userName = (user != null) ? user.getUsername() : "Desconhecido";
     comment.setUserName(userName);
-    comment.setProduct(product); // Relacionando o comentário ao produto
+    comment.setProduct(product);
+    product.getComments().add(comment);
 
-    product.getComments().add(comment); // Adicionando o comentário à lista de comentários do produto
-System.out.println("UUID recebido: " + dto.getUserId());
-Optional<User> userOpt = userRepository.findById(dto.getUserId());
+    Product savedProduct = productRepository.save(product);
 
-if (userOpt.isPresent()) {
-    System.out.println("Usuário encontrado: " + userOpt.get().getUsername());
-} else {
-    System.out.println("Usuário NÃO encontrado no banco.");
-}
+    // Enviar notificação para o dono do produto
+    Optional<User> ownerOpt = userRepository.findById(product.getUserId());
 
-    return productRepository.save(product); // Salvando o produto com o novo comentário
+    if (ownerOpt.isPresent() && user != null) {
+        String title = "Novo comentário!";
+        String message = user.getUsername() + " comentou: " + dto.getText();
+
+        String playerId = ownerOpt.get().getOnesignalId(); // <-- precisa estar salvo no User
+
+        if (playerId != null) {
+            notificationService.sendNotification(List.of(playerId), title, message);
+        }
+    }
+
+    return savedProduct;
 }
 
 

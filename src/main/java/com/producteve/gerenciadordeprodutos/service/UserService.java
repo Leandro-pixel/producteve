@@ -28,13 +28,14 @@ public class UserService {
             throw new RuntimeException("Já existe um usuário cadastrado com esse e-mail.");
         }
     
-        var entity = new User(
-            null,
-            createUserDto.username(),
-            createUserDto.email(),
-            Instant.now(),
-            null
-        );
+        var entity = new  User(
+        null,                                  // userId
+        createUserDto.username(),              // username
+        createUserDto.email(),                 // email
+        createUserDto.onesignalId(),           // onesignalId
+        Instant.now(),                        // creationTimestamp
+        null                                 // updateTimestamp
+    );
     
         return userRepository.save(entity);
     }

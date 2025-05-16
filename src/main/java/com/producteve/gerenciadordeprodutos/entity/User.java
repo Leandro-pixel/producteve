@@ -28,6 +28,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "onesignal_id", unique = true, nullable = true)
+    private String onesignalId;
+
     @CreationTimestamp
     private Instant creationTimestamp;
 
@@ -37,16 +40,11 @@ public class User {
     public User() {
     }
 
-    public User(
-        UUID userId,
-        String username,
-        String email,
-        Instant creationTimestamp,
-        Instant updateTimestamp
-    ) {
+    public User(UUID userId, String username, String email, String onesignalId, Instant creationTimestamp, Instant updateTimestamp) {
         this.userId = userId;
         this.username = username;
         this.email = email;
+        this.onesignalId = onesignalId;
         this.creationTimestamp = creationTimestamp;
         this.updateTimestamp = updateTimestamp;
     }
@@ -89,5 +87,12 @@ public class User {
 
     public void setUpdateTimestamp(Instant updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
+    }
+    public String getOnesignalId() {
+        return onesignalId;
+    }
+
+    public void setOnesignalId(String onesignalId) {
+        this.onesignalId = onesignalId;
     }
 }
